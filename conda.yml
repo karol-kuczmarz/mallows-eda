@@ -1,0 +1,5 @@
+name: mallows
+
+dependencies:
+- python=3.12
+- pip
