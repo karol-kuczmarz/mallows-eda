@@ -14,7 +14,7 @@ class Mallows:
         possible_values = list(range(self.n))
         pi = np.zeros(self.n)
         for j in range(0, self.n - 1):
-            r_j_dist = np.exp(- self.theta * np.arange(0, self.n - j)) / self.V[j]
+            r_j_dist = np.exp(-self.theta * np.arange(0, self.n - j)) / self.V[j]
             r_j = np.random.choice(np.arange(0, self.n - j), p=r_j_dist)
             pi[j] = possible_values[r_j]
             del possible_values[r_j]
@@ -26,13 +26,32 @@ class Mallows:
         return np.array([self.sample() for _ in range(n)])
 
     def probability(self, sigma):
-        return np.exp(-self.theta * self.metric(self.sigma_0, sigma)) / self.normalization_constant
-    
+        return (
+            np.exp(-self.theta * self.metric(self.sigma_0, sigma))
+            / self.normalization_constant
+        )
+
     def _compute_normalization_constant(self):
-        prod = 1.
+        prod = 1.0
         for j in range(1, self.n):
-            prod *= ((1 - np.exp(- self.theta * (self.n -j + 1))) / (1 - np.exp(- self.theta)))
+            prod *= (1 - np.exp(-self.theta * (self.n - j + 1))) / (
+                1 - np.exp(-self.theta)
+            )
         return prod
-    
+
     def _compute_V(self):
-        return (1 - np.exp(- self.theta * (self.n - np.arange(1, self.n) + 1))) / (1 - np.exp(- self.theta))
+        return (1 - np.exp(-self.theta * (self.n - np.arange(1, self.n) + 1))) / (
+            1 - np.exp(-self.theta)
+        )
+
+
+class Uniform:
+    def __init__(self, n):
+        self.n = n
+        self.rng = np.random.default_rng()
+
+    def sample(self):
+        return self.rng.permutation(self.n)
+
+    def sample_n(self, m):
+        return np.array([self.sample() for _ in range(m)])
