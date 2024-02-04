@@ -1,9 +1,11 @@
-import requests
-from mallows import config
-import tarfile
+import gzip
 import os
 import shutil
-import gzip
+import tarfile
+
+import requests
+
+from mallows import config
 
 url = "http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/ALL_tsp.tar.gz"
 response = requests.get(url, stream=True)
