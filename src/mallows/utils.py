@@ -2,7 +2,7 @@ import numpy as np
 
 
 def estimate_mean(samples):
-    samples += 1
+    samples = samples.copy() + 1
     pi = np.mean(samples, axis=0)
     permutation = np.argsort(pi)
     return permutation
@@ -28,7 +28,7 @@ def estimate_theta(samples, sigma_0):
         )
         return val
 
-    def newton_raphson(f, f_prime, x_0, tol=1e-5, max_iter=1000):
+    def newton_raphson(f, f_prime, x_0=0.01, tol=1e-5, max_iter=1000):
         x = x_0
         for i in range(max_iter):
             f_x = f(x)
@@ -50,6 +50,5 @@ def estimate_theta(samples, sigma_0):
     theta = newton_raphson(
         lambda x: f(x, V, sigma_0.shape[-1]),
         lambda x: f_prime(x, sigma_0.shape[-1]),
-        0.01,
     )
     return theta

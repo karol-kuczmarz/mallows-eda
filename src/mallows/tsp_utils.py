@@ -1,9 +1,11 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
 
-def read_tsp_file(filepath):
+def read_tsp_file(filepath, is_opt=False):
     def get_dimension(file):
         for line in file:
             if line.startswith("DIMENSION"):
@@ -80,8 +82,6 @@ def read_tsp_file(filepath):
             optimal_solution[index] = int(line.split()[0]) - 1
         return optimal_solution
 
-    is_opt = str(filepath).endswith("tour.tsp")
-
     with open(filepath, "r") as file:
         lines = file.readlines()
 
@@ -100,15 +100,19 @@ def read_tsp_file(filepath):
             dist_matrix = get_dist_matrix_from_full_matrix(
                 lines[edge_weight_section_loc + 1 : edge_weight_section_loc + n + 1]
             )
+        else:
+            raise ValueError("Edge weight format not supported")
         node_coord_loc = get_node_coord_section_loc(lines, "DISPLAY_DATA_SECTION")
     elif edge_weight_type == "EUC_2D":
         node_coord_loc = get_node_coord_section_loc(lines, "NODE_COORD_SECTION")
+    else:
+        raise ValueError("Edge weight type not supported")
     coords = get_coords(lines[node_coord_loc + 1 : node_coord_loc + n + 1])
     if edge_weight_type == "EUC_2D":
         dist_matrix = get_dist_matrix_from_coords(coords)
 
     if is_opt:
-        lines = open(filepath, "r").readlines()
+        lines = open(filepath[:-3] + "opt.tour", "r").readlines()
         tour_section_loc = get_solution_loc(lines)
         optimal_solution = get_optimal_solution(
             lines[tour_section_loc + 1 : tour_section_loc + n + 1]
@@ -167,3 +171,24 @@ def plot_solution(p, title, coords, dist_matrix):
     plt.title(title)
 
     plt.show()
+
+
+def get_objective_function(dist_matrix):
+    def tsp_objective_function(permutations):
+        permutations_with_0 = np.concatenate(
+            [np.zeros([permutations.shape[0], 1], dtype=np.int64), permutations], axis=1
+        )
+        return dist_matrix[
+            permutations_with_0, np.roll(permutations_with_0, -1, axis=1)
+        ].sum(axis=1)
+
+    return tsp_objective_function
+
+
+def get_tsp_problem(data_dir, problem_name):
+    coords, dist_matrix, optimal_solution = read_tsp_file(
+        f"{data_dir}/{problem_name}.tsp",
+        os.path.exists(f"{data_dir}/{problem_name}.opt.tour"),
+    )
+    objective_function = get_objective_function(dist_matrix)
+    return coords, dist_matrix, objective_function, optimal_solution

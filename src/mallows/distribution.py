@@ -12,7 +12,7 @@ class Mallows:
 
     def sample(self):
         possible_values = list(range(self.n))
-        pi = np.zeros(self.n)
+        pi = np.zeros(self.n, dtype=np.int64)
         for j in range(0, self.n - 1):
             r_j_dist = np.exp(-self.theta * np.arange(0, self.n - j)) / self.V[j]
             r_j = np.random.choice(np.arange(0, self.n - j), p=r_j_dist)
