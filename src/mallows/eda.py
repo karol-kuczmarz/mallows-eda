@@ -37,14 +37,30 @@ class EDA:
             dispersion_parameter = estimate_theta(
                 selected_population, central_permutation
             )
+            # dispersion_parameter = 0.01
             offspring = Mallows(
                 central_permutation, dispersion_parameter, KendallTau(self.problem_size)
             ).sample_n(self.offspring_size)
             population = np.concatenate(
-                [selected_population[0, :].reshape(1, -1), offspring], axis=0
+                [
+                    population[np.argmin(population_objectives), :].reshape(1, -1),
+                    offspring,
+                ],
+                axis=0,
             )
-            if i % 10 == 0:
+            if i % 100 == 0:
                 print(
                     f"Generation {i} - Best: {population_objectives.min()}, Theta: {dispersion_parameter}"
                 )
+                print(f"Generation {i} - Average: {population_objectives.mean()}")
+                print(
+                    f"Generation {i} - Parents average: {population_objectives[selected_indices].mean()}"
+                )
+                print(
+                    f"Generation {i} - Best individual repeats: {(population_objectives.argmin() == selected_indices).sum()}"
+                )
+                print(
+                    f"Central permutation objective: {self.objective_function(central_permutation.reshape(1,-1))[0]}"
+                )
+
         return central_permutation, dispersion_parameter

@@ -82,6 +82,30 @@ def read_tsp_file(filepath, is_opt=False):
             optimal_solution[index] = int(line.split()[0]) - 1
         return optimal_solution
 
+    def get_dist_matrix_from_geo_coords(coords):
+        def geo_distance(coord1, coord2):
+            RRR = 6378.388
+            q1 = np.cos(coord1[1] - coord2[1])
+            q2 = np.cos(coord1[0] - coord2[0])
+            q3 = np.cos(coord1[0] + coord2[0])
+            return int(RRR * np.arccos(0.5 * ((1.0 + q1) * q2 - (1.0 - q1) * q3)) + 1.0)
+
+        def transform_coord(coord):
+            deg = int(coord)
+            min_ = coord - deg
+            return np.pi * (deg + 5.0 * min_ / 3.0) / 180.0
+
+        for i in range(n):
+            coords[i, 0] = transform_coord(coords[i, 0])
+            coords[i, 1] = transform_coord(coords[i, 1])
+
+        dist_matrix = np.zeros((n, n))
+        for i in range(n):
+            for j in range(i + 1, n):
+                dist_matrix[i, j] = geo_distance(coords[i, :], coords[j, :])
+                dist_matrix[j, i] = dist_matrix[i, j]
+        return dist_matrix
+
     with open(filepath, "r") as file:
         lines = file.readlines()
 
@@ -105,11 +129,15 @@ def read_tsp_file(filepath, is_opt=False):
         node_coord_loc = get_node_coord_section_loc(lines, "DISPLAY_DATA_SECTION")
     elif edge_weight_type == "EUC_2D":
         node_coord_loc = get_node_coord_section_loc(lines, "NODE_COORD_SECTION")
+    elif edge_weight_type == "GEO":
+        node_coord_loc = get_node_coord_section_loc(lines, "NODE_COORD_SECTION")
     else:
         raise ValueError("Edge weight type not supported")
     coords = get_coords(lines[node_coord_loc + 1 : node_coord_loc + n + 1])
     if edge_weight_type == "EUC_2D":
         dist_matrix = get_dist_matrix_from_coords(coords)
+    elif edge_weight_type == "GEO":
+        dist_matrix = get_dist_matrix_from_geo_coords(coords)
 
     if is_opt:
         lines = open(filepath[:-3] + "opt.tour", "r").readlines()

@@ -4,8 +4,7 @@ import numpy as np
 def estimate_mean(samples):
     samples = samples.copy() + 1
     pi = np.mean(samples, axis=0)
-    permutation = np.argsort(pi)
-    return permutation
+    return np.argsort(np.argsort(pi))
 
 
 def estimate_theta(samples, sigma_0):
@@ -33,9 +32,10 @@ def estimate_theta(samples, sigma_0):
         for i in range(max_iter):
             f_x = f(x)
             x_new = x - f_x / f_prime(x)
-            if np.abs(f_x) < tol:
+            if np.abs(x_new - x) < tol:
                 return x_new
             x = x_new
+        print("Newton-Raphson did not converge")
         return x
 
     sigma_0_inv = np.argsort(sigma_0)

@@ -19,7 +19,7 @@ class Mallows:
             pi[j] = possible_values[r_j]
             del possible_values[r_j]
         pi[self.n - 1] = possible_values[0]
-        sigma = pi[np.argsort(self.sigma_0)]
+        sigma = pi[self.sigma_0]
         return sigma
 
     def sample_n(self, m):
@@ -42,7 +42,7 @@ class Mallows:
                 & (identities_not_modified.T < self.n - j).T
             ]
         pi[:, self.n - 1] = identities[:, 0]
-        return pi[:, np.argsort(self.sigma_0)]
+        return pi[:, self.sigma_0]
 
     def probability(self, sigma):
         return (
