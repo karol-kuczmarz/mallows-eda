@@ -23,3 +23,7 @@ At the end, we make our development code available in every location.
 ```shell
 pip install --no-deps --no-build-isolation -e .
 ```
+
+## Dataset
+
+Download the TSP datasets with [script](./scripts/download_data.py) (`scripts/download_data.py`).
