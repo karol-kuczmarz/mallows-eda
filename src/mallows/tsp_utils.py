@@ -154,15 +154,16 @@ def plot_solution(p, title, coords, dist_matrix):
     route = p
     n = len(route)
 
-    plt.figure(figsize=(12, 8))
     fig, ax = plt.subplots(figsize=(12, 8))
 
-    plt.plot(coords[:, 0], coords[:, 1], "o")
+    route = np.concatenate([np.array([0]), route])
+
+    ax.plot(coords[:, 0], coords[:, 1], "o")
 
     for i in range(n):
-        plt.text(
-            coords[i, 0] + 8,
-            coords[i, 1] + 8,
+        ax.text(
+            coords[i, 0],
+            coords[i, 1],
             str(i),
             fontdict={"weight": "bold", "size": 8},
         )
@@ -175,9 +176,9 @@ def plot_solution(p, title, coords, dist_matrix):
                 color="gray",
             )
         )
-        plt.text(
-            (coords[route[i - 1], 0] + coords[route[i], 0]) / 2 + 6,
-            (coords[route[i - 1], 1] + coords[route[i], 1]) / 2 + 6,
+        ax.text(
+            (coords[route[i - 1], 0] + coords[route[i], 0]) / 2,
+            (coords[route[i - 1], 1] + coords[route[i], 1]) / 2,
             "%d" % dist_matrix[route[i - 1], route[i]],
             fontdict={"weight": "normal", "size": 7},
         )
@@ -189,20 +190,22 @@ def plot_solution(p, title, coords, dist_matrix):
             color="gray",
         )
     )
-    plt.text(
-        (coords[route[-1], 0] + coords[route[0], 0]) / 2 + 6,
-        (coords[route[-1], 1] + coords[route[0], 1]) / 2 + 6,
+    ax.text(
+        (coords[route[-1], 0] + coords[route[0], 0]) / 2,
+        (coords[route[-1], 1] + coords[route[0], 1]) / 2,
         "%d" % dist_matrix[route[-1], route[0]],
         fontdict={"weight": "normal", "size": 7},
     )
 
-    plt.title(title)
+    ax.set_title(title)
 
     plt.show()
 
 
 def get_objective_function(dist_matrix):
     def tsp_objective_function(permutations):
+        # Add 0 to the beginning of each permutaiton
+        # Required shape: (n_permutations, space_size)
         permutations_with_0 = np.concatenate(
             [np.zeros([permutations.shape[0], 1], dtype=np.int64), permutations], axis=1
         )

@@ -33,8 +33,15 @@ class EDA:
         population = Uniform(self.problem_size).sample_n(self.population_size)
         old_central_permutation = np.zeros(self.problem_size)
         central_permutation_repetitions = 0
+        best_individual = None
+        best_objective = np.inf
         for i in tqdm(range(self.n_iter), disable=disable_tqdm):
             population_objectives = self.objective_function(population)
+
+            if population_objectives.min() < best_objective:
+                best_objective = population_objectives.min()
+                best_individual = population[population_objectives.argmin()]
+
             selected_indices = self.selection_function(
                 population_objectives, self.selection_size
             )
@@ -89,7 +96,13 @@ class EDA:
                 old_central_permutation = central_permutation
                 central_permutation_repetitions = 0
 
-        return central_permutation, dispersion_parameter
+        population_objectives = self.objective_function(population)
+
+        if population_objectives.min() < best_objective:
+            best_objective = population_objectives.min()
+            best_individual = population[population_objectives.argmin()]
+
+        return central_permutation, dispersion_parameter, best_individual
 
     def shake(self, permutation, population_size):
         population = np.tile(permutation, (population_size, 1))

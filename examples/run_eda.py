@@ -4,7 +4,7 @@ from mallows.eda import EDA
 from mallows.selection import (adaptation_roulette_selection,
                                exponential_ranking_selection,
                                get_linear_ranking_selection, top_k_selection)
-from mallows.tsp_utils import get_tsp_problem
+from mallows.tsp_utils import get_tsp_problem, plot_solution
 
 problem_size = 14
 population_size = problem_size * 1000
@@ -32,4 +32,9 @@ eda = EDA(
     selection_function,
     restart_after_central_permutaition_fix,
 )
-center_permutation, dispersion_parameter = eda.evolve()
+center_permutation, dispersion_parameter, best = eda.evolve()
+
+
+plot_solution(best + 1, "Best found solution", coords, dist_matrix)
+
+
