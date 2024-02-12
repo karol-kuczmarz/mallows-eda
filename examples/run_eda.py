@@ -8,14 +8,20 @@ from mallows.tsp_utils import get_tsp_problem
 
 problem_size = 14
 population_size = problem_size * 1000
+# population_size = problem_size * 10
 selection_size = problem_size * 100
+# selection_size = problem_size
 offspring_size = population_size - 1
 n_iter = problem_size * 1000
 selection_function = top_k_selection
+restart_after_central_permutaition_fix = 200
 
 coords, dist_matrix, objective_function, optimal_solution = get_tsp_problem(
     config.DATA_DIR / "tsp", "burma14"
 )
+if optimal_solution is not None:
+    print(objective_function(optimal_solution[1:].reshape(1, -1)))
+
 eda = EDA(
     coords.shape[0],
     objective_function,
@@ -24,5 +30,6 @@ eda = EDA(
     offspring_size,
     n_iter,
     selection_function,
+    restart_after_central_permutaition_fix,
 )
 center_permutation, dispersion_parameter = eda.evolve()
