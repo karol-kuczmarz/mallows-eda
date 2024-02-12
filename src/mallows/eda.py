@@ -17,6 +17,7 @@ class EDA:
         n_iter,
         selection_function,
         restart_after_central_permutaition_fix,
+        wandb_run=None
     ):
         self.problem_size = problem_size - 1
         self.objective_function = lambda x: objective_function(x + 1)
@@ -28,6 +29,7 @@ class EDA:
         self.restart_after_central_permutaition_fix = (
             restart_after_central_permutaition_fix
         )
+        self.wandb_run = wandb_run
 
     def evolve(self, disable_tqdm=False):
         population = Uniform(self.problem_size).sample_n(self.population_size)
@@ -59,6 +61,22 @@ class EDA:
                     offspring,
                 ],
                 axis=0,
+            )
+
+            self.wandb_run.log(
+                {
+                    "generation": i,
+                    "objective_min": population_objectives.min(),
+                    "objective_avg": population_objectives.mean(),
+                    "objective_max": population_objectives.max(),
+                    "theta": dispersion_parameter,
+                    "parents_average": population_objectives[selected_indices].mean(),
+                    "best_individual_repeats": (population_objectives.argmin() == selected_indices).sum(),
+                    "central_permutation_objective": self.objective_function(central_permutation.reshape(1,-1))[0],
+                    "central_permutation_repetitions": central_permutation_repetitions,
+                    "central_permutation": central_permutation,
+                    "best_individual": best_individual,
+                }
             )
 
             if i % 100 == 0:
@@ -106,6 +124,7 @@ class EDA:
 
     def shake(self, permutation, population_size):
         population = np.tile(permutation, (population_size, 1))
+        population_objectives_pre_shake = self.objective_function(population)
         for i in range(population_size):
             for _ in range(5):
                 idx = np.random.choice(self.problem_size)
@@ -122,4 +141,15 @@ class EDA:
                     i, new_idx : self.problem_size - 1
                 ]
                 population[i, new_idx] = old_value
+        population_objectives_post_shake = self.objective_function(population)
+        self.wandb_run.log(
+            {
+                "pre_shake_objective_min": population_objectives_pre_shake.min(),
+                "pre_shake_objective_avg": population_objectives_pre_shake.mean(),
+                "pre_shake_objective_max": population_objectives_pre_shake.max(),
+                "post_shake_objective_min": population_objectives_post_shake.min(),
+                "post_shake_objective_avg": population_objectives_post_shake.mean(),
+                "post_shake_objective_max": population_objectives_post_shake.max()
+            }
+        )
         return population
