@@ -55,4 +55,5 @@ def run_eda(problem_name, problem_size, population_size, selection_size, offspri
         plot_solution(best + 1, "Best found solution", coords, dist_matrix)
 
 
-run_eda("burma14", 14, 14000, 1400, 13999, 140, top_k_selection, 200, True)
+# run_eda("burma14", 14, 14000, 1400, 13999, 140, top_k_selection, 200, True)
+run_eda("bays29", 29, 29000, 2900, 28999, 2000, top_k_selection, 250, True)
