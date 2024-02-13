@@ -11,12 +11,22 @@
     - [Estymowanie parametrów rozkładu za pomocą próbki](#estymowanie-parametrów-rozkładu-za-pomocą-próbki)
       - [Estymacja permutacji centralnej](#estymacja-permutacji-centralnej)
       - [Estymacja parametru rozrzutu](#estymacja-parametru-rozrzutu)
+    - [Przebieg algorytmu](#przebieg-algorytmu)
+      - [Elitarność](#elitarność)
+      - [Shake](#shake)
   - [Implementacja](#implementacja)
+    - [`distribution.py`](#distributionpy)
+    - [`eda.py`](#edapy)
+    - [`metrics.py`](#metricspy)
+    - [`selection.py`](#selectionpy)
+    - [`tsp_utils.py`](#tsp_utilspy)
+    - [`utils.py`](#utilspy)
   - [Wyniki](#wyniki)
   - [Podsumowanie](#podsumowanie)
     - [Wnioski końcowe](#wnioski-końcowe)
     - [Podsumowanie](#podsumowanie-1)
     - [Perspektywy rozwoju](#perspektywy-rozwoju)
+  - [Literatura](#literatura)
 
 ## Rozpatrywane zagadnienie
 
@@ -102,7 +112,57 @@ $$\sum_{j=0}^{N-2}\bar{V}_j = \frac{N-1}{e^\theta-1} - \sum_{j=0}^{N-2}\frac{N-j
 
 Uzyskujemy parametr rozrzutu poprzez rozwiązanie powyższego równania metodą Newtona.
 
+### Przebieg algorytmu
+
+Wykorzystujemy standardowy algorytm EDA.
+
+1. Generujemy $X$ osobników.
+2. Wybieramy $Y < X$ najlepszych osobników.
+3. Estymujemy parametry rozkładu Mallowsa na wybranej podpopulacji.
+4. Generujemy nową populację.
+5. Powracamy do punktu nr 2.
+
+#### Elitarność
+
+Najlepszy osobnik z populacji zawsze przechodzi do nowej populacji.
+
+#### Shake
+
+Podczas wykonywania eksperymentów zauważliśmy, że permutacja centralna przestaje się zmieniać z epoki na epokę. W związku z tym po ustalonej liczbie epok, w których mieliśmy tę samą permutacje centralną dokonujemy operacji `shake`. Została ona opisana w artykule stosującym rozkład Mallowsa do Permutation Scheduling Flowshop Problem. W tej operacji bierzemy najlepszego osobnika z populacji i tylko na jego podstawie generujemy nową populację. Każdy nowy osobnik to nasz źródłowy osobnik z 5 elementami przestawionymi maksymalnie o 5 miejsc w prawo lub lewo.
+
+Operacja `shake` okazuje się być kluczowa dla osiągnięcia jakiegokolwiek sukcesu w znajdywaniu dobrych rozwiązań przez alogrytm EDA.
+
 ## Implementacja
+
+Wszystkie operacje zostały zaimplementowane przy użyciu biblioteki `numpy`. Wsyztskie potrzebne funkcje znajdują się w folderze `src/mallows/`. W celu przyspieszenia pracy algorytmu niektóre funkcje nie działają na jednej permutacji, lecz zbiorze permutacji (tablicy dwuwymiarowej).
+
+### `distribution.py`
+
+Tutaj zaimplementowany jest rozkład Mallowsa oraz rozkład jednostajny na permutacjach (do inicjalizowania populacji).
+
+Najważniejszy kod w tym pliku to funkcje generujące próbki z rozkładu Mallowsa.
+
+Funkcja `sample` generuje jedną próbkę i wprost implementuje opisaną wcześniej metodę próbkowania. Natomiast `sample_n` generuje $n$ próbek i generuje wszystkie równocześnie. Tutaj dosyć istotny był czas wykonywania funkcji i implementacja ma przez to pogorszoną czytelność.
+
+### `eda.py`
+
+Tutaj zaimplementowany jest algorytm EDA oraz funkcja `shake`.
+
+### `metrics.py`
+
+Zaimplementowana jest tutaj metryka Kendall-$\tau$. Tak naprawdę nie korzystamy z tego kodu, do uruchamiania algorytmu.
+
+### `selection.py`
+
+Zaimplementowane są tu różne metody selekcji osobników, na podstawie których szacowane są parametry rozkładu Mallowsa. Wszystkie ekperymenty przeprowadzane były z prostym wybieraniem $X$ najlepszych osobników z populacji.
+
+### `tsp_utils.py`
+
+Instancje problemu komiwojażera pobrane są z [TSPLIB](http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/). Potrzebny jest parser by wczytać te dane i przekształcić do potrzebnej nam formy. Znajduje się tu również funkcja do rysowania rozwiązań.
+
+### `utils.py`
+
+Plik zawiera metody szacujące permutację centralną oraz parametr rozrzutu.
 
 ## Wyniki
 
@@ -113,3 +173,8 @@ Uzyskujemy parametr rozrzutu poprzez rozwiązanie powyższego równania metodą 
 ### Podsumowanie
 
 ### Perspektywy rozwoju
+
+## Literatura
+
+1. [Ceberio, J., Mendiburu, A., Lozano, J.A. (2011). *Introducing the Mallows Model on Estimation of Distribution Algorithms.* In: Lu, BL., Zhang, L., Kwok, J. (eds) Neural Information Processing. ICONIP 2011. Lecture Notes in Computer Science, vol 7063. Springer, Berlin, Heidelberg.](https://doi.org/10.1007/978-3-642-24958-7_54)
+2. [J. Ceberio, E. Irurozki, A. Mendiburu and J. A. Lozano, "*A Distance-Based Ranking Model Estimation of Distribution Algorithm for the Flowshop Scheduling Problem,*" in IEEE Transactions on Evolutionary Computation, vol. 18, no. 2, pp. 286-300, April 2014,](https://doi.org/10.1109/TEVC.2013.2260548)
