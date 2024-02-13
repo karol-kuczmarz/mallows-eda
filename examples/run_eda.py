@@ -9,6 +9,7 @@ import wandb
 import numpy as np
 from tqdm import trange, tqdm
 import json
+import matplotlib.pyplot as plt
 
 name_to_selection_function = {
     "adaptation_roulette_selection": adaptation_roulette_selection,
@@ -51,8 +52,17 @@ def run_eda(config, verbose=False):
 
     center_permutation, dispersion_parameter, best = eda.evolve(disable_tqdm=True)
 
+    fig = plot_solution(best + 1, "Best found solution", coords, dist_matrix)
+    wandb.log({
+        "best_route": wandb.Image(fig),
+        "final_dispersion_parameter": dispersion_parameter,
+        "final_center_permutation": center_permutation,
+        "final_objective": objective_function(best.reshape(1, -1))
+        })
+
     if verbose:
-        plot_solution(best + 1, "Best found solution", coords, dist_matrix)
+        plt.show()
+        
 
     wandb_run.finish()
 
@@ -62,69 +72,8 @@ def run_experiment_series(config, n_runs):
     for _ in range(n_runs):
         run_eda(config)
 
-# bays29_config = {
-#     "problem_name": "bays29",
-#     "problem_size": 29,
-#     "population_size": 29000,
-#     "selection_size": 2900,
-#     "offspring_size": 28999,
-#     "n_iter": 5000,
-#     "selection_function": top_k_selection,
-#     "restart_after_central_permutaition_fix": 250,
-#     "seed": 42
-# }
-
-# bays29_config = {
-#     "problem_name": "bays29",
-#     "problem_size": 29,
-#     "population_size": 2900,
-#     "selection_size": 290,
-#     "offspring_size": 2899,
-#     "n_iter": 10000,
-#     "selection_function": top_k_selection,
-#     "restart_after_central_permutaition_fix": 100,
-#     "seed": 42
-# }
-        
-# bays29_config = {
-#     "problem_name": "bays29",
-#     "problem_size": 29,
-#     "population_size": 290,
-#     "selection_size": 29,
-#     "offspring_size": 289,
-#     "n_iter": 100000,
-#     "selection_function": top_k_selection,
-#     "restart_after_central_permutaition_fix": 100,
-#     "seed": 42
-# }
-        
-# bays29_config = {
-#     "problem_name": "bays29",
-#     "problem_size": 29,
-#     "population_size": 290,
-#     "selection_size": 29,
-#     "offspring_size": 289,
-#     "n_iter": 100000,
-#     "selection_function": top_k_selection,
-#     "restart_after_central_permutaition_fix": 250,
-#     "seed": 42
-# }
-        
-# bays29_config = {
-#     "problem_name": "bays29",
-#     "problem_size": 29,
-#     "population_size": 29000,
-#     "selection_size": 2900,
-#     "offspring_size": 28999,
-#     "n_iter": 10000,
-#     "selection_function": top_k_selection,
-#     "restart_after_central_permutaition_fix": 100,
-#     "seed": 42,
-#     "series": "E"
-# }
-
 experiments_per_config = 5
-configs = json.load(open("./experiments/eda_configs.json", "r"))
+configs = json.load(open("./experiments/kroA100_configs.json", "r"))
 for config in tqdm(configs):
     config["selection_function"] = name_to_selection_function[config["selection_function"]]
     run_experiment_series(config, experiments_per_config)

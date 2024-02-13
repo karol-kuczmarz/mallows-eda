@@ -32,7 +32,9 @@ def generate_experiment(problem_name, problem_size):
                                         offspring_sizes[i], n_iters, restart_value, 42, letters[2*i+j]))
     return configs
 
+problems = [("bayg29", 29), ("bays29", 29), ("kroA100", 100), ("kroA150", 150), ("kroA200", 200)]
 
-configs = generate_experiment("bayg29", 29)
+for problem_name, problem_dim in problems:
+    configs = generate_experiment(problem_name, problem_dim)
 
-json.dump(configs, open("./experiments/eda_configs.json", "w"))
+    json.dump(configs, open(f"./experiments/{problem_name}_configs.json", "w"))

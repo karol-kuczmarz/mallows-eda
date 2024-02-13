@@ -150,7 +150,7 @@ def read_tsp_file(filepath, is_opt=False):
     return coords, dist_matrix, None
 
 
-def plot_solution(p, title, coords, dist_matrix):
+def plot_solution(p, title, coords, dist_matrix, show=True):
     route = p
     n = len(route)
 
@@ -198,8 +198,10 @@ def plot_solution(p, title, coords, dist_matrix):
     )
 
     ax.set_title(title)
+    if show:
+        plt.show()
 
-    plt.show()
+    return fig
 
 
 def get_objective_function(dist_matrix):
