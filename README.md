@@ -27,3 +27,7 @@ pip install --no-deps --no-build-isolation -e .
 ## Dataset
 
 Download the TSP datasets with [script](./scripts/download_data.py) (`scripts/download_data.py`).
+
+## Usage
+
+File [example](./examples/run_eda.py) (`examples/run_eda.py`) shows the basic usage of this codebase.
